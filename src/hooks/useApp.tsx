@@ -1,6 +1,6 @@
 'use client';
-import {produce} from 'immer';
 import {create} from 'zustand';
+import {immer} from 'zustand/middleware/immer';
 
 type Character = {
   type: 'PC' | 'NPC';
@@ -14,22 +14,23 @@ type Encounter = {
   characters: Record<string, Character>;
 };
 
-type AppContext = {
+type State = {
   encounters: Record<string, Encounter>;
+};
+
+type Actions = {
   addCharacter: (encounterId: string, character: Character) => void;
 };
 
-const useApp = create<AppContext>(
-  (set): AppContext => ({
+const useApp = create<State & Actions>()(
+  immer((set) => ({
     encounters: {'1': {name: 'Encounter 1', characters: {}}},
     addCharacter: (encounterId, character) => {
-      set(
-        produce((draft: AppContext) => {
-          draft.encounters[encounterId].characters[nextId(draft.encounters[encounterId].characters)] = character;
-        }),
-      );
+      set((draft) => {
+        draft.encounters[encounterId].characters[nextId(draft.encounters[encounterId].characters)] = character;
+      });
     },
-  }),
+  })),
 );
 
 function nextId(object: Record<string, any>): string {
