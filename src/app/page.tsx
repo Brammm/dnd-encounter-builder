@@ -1,6 +1,6 @@
 'use client';
 import AddPlayerForm from '@/app/AddPlayerForm';
-import {useApp} from '@/hooks/useApp';
+import useApp from '@/hooks/useApp';
 
 export default function Home() {
   const {addCharacter, encounters} = useApp();

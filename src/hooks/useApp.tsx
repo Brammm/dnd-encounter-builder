@@ -1,6 +1,6 @@
 'use client';
-import {createContext, PropsWithChildren, useContext, useState} from 'react';
 import {produce} from 'immer';
+import {create} from 'zustand';
 
 type Character = {
   type: 'PC' | 'NPC';
@@ -19,39 +19,21 @@ type AppContext = {
   addCharacter: (encounterId: string, character: Character) => void;
 };
 
-const AppContext = createContext<AppContext | undefined>(undefined);
+const useApp = create<AppContext>(
+  (set): AppContext => ({
+    encounters: {'1': {name: 'Encounter 1', characters: {}}},
+    addCharacter: (encounterId, character) => {
+      set(
+        produce((draft: AppContext) => {
+          draft.encounters[encounterId].characters[nextId(draft.encounters[encounterId].characters)] = character;
+        }),
+      );
+    },
+  }),
+);
 
-export function AppContextProvider({children}: PropsWithChildren) {
-  const [encounters, setEncounters] = useState<Record<string, Encounter>>({'1': {name: 'Encounter 1', characters: {}}});
-
-  function nextId(object: Record<string, any>): string {
-    return (Object.entries(object).length + 1).toString();
-  }
-
-  return (
-    <AppContext.Provider
-      value={{
-        encounters,
-        addCharacter: (encounterId, character) => {
-          setEncounters(
-            produce((draft) => {
-              draft[encounterId].characters[nextId(draft[encounterId].characters)] = character;
-            }),
-          );
-        },
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  );
+function nextId(object: Record<string, any>): string {
+  return (Object.entries(object).length + 1).toString();
 }
 
-export function useApp() {
-  const state = useContext(AppContext);
-
-  if (!state) {
-    throw new Error('Can only be used inside AppContextProvider');
-  }
-
-  return state;
-}
+export default useApp;
