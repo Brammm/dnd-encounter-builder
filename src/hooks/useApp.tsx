@@ -9,28 +9,33 @@ type Character = {
   hp?: number;
 };
 
-type AppContext = {
+type Encounter = {
+  name: string;
   characters: Record<string, Character>;
-  addCharacter: (character: Character) => void;
+};
+
+type AppContext = {
+  encounters: Record<string, Encounter>;
+  addCharacter: (encounterId: string, character: Character) => void;
 };
 
 const AppContext = createContext<AppContext | undefined>(undefined);
 
 export function AppContextProvider({children}: PropsWithChildren) {
-  const [characters, setCharacters] = useState<Record<string, Character>>({});
+  const [encounters, setEncounters] = useState<Record<string, Encounter>>({'1': {name: 'Encounter 1', characters: {}}});
 
-  function nextId(): string {
-    return (Object.entries(characters).length + 1).toString();
+  function nextId(object: Record<string, any>): string {
+    return (Object.entries(object).length + 1).toString();
   }
 
   return (
     <AppContext.Provider
       value={{
-        characters,
-        addCharacter: (character) => {
-          setCharacters(
+        encounters,
+        addCharacter: (encounterId, character) => {
+          setEncounters(
             produce((draft) => {
-              draft[nextId()] = character;
+              draft[encounterId].characters[nextId(draft[encounterId].characters)] = character;
             }),
           );
         },
