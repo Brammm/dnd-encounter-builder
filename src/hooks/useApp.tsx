@@ -2,16 +2,18 @@
 import {create} from 'zustand';
 import {immer} from 'zustand/middleware/immer';
 
-type Character = {
+export type Character = {
+  id: string;
   type: 'PC' | 'NPC';
   name: string;
   initiative: number;
   hp?: number;
 };
 
-type Encounter = {
+export type Encounter = {
+  id: string;
   name: string;
-  characters: Record<string, Character>;
+  characters: Character[];
 };
 
 type State = {
@@ -19,22 +21,38 @@ type State = {
 };
 
 type Actions = {
-  addCharacter: (encounterId: string, character: Character) => void;
+  addCharacter: (encounterId: string, character: Omit<Character, 'id'>) => void;
 };
 
 const useApp = create<State & Actions>()(
   immer((set) => ({
-    encounters: {'1': {name: 'Encounter 1', characters: {}}},
+    encounters: {
+      '1': {
+        id: '1',
+        name: 'Encounter 1',
+        characters: [],
+      },
+    },
     addCharacter: (encounterId, character) => {
       set((draft) => {
-        draft.encounters[encounterId].characters[nextId(draft.encounters[encounterId].characters)] = character;
+        const charId = nextId(draft.encounters[encounterId].characters);
+
+        draft.encounters[encounterId].characters = [
+          ...draft.encounters[encounterId].characters,
+          {...character, id: charId},
+        ];
       });
     },
   })),
 );
 
-function nextId(object: Record<string, any>): string {
-  return (Object.entries(object).length + 1).toString();
+function nextId(object: any[] | Record<string, any>): string {
+  let array = object;
+  if (!Array.isArray(array)) {
+    array = Object.keys(array);
+  }
+
+  return (array.length + 1).toString();
 }
 
 export default useApp;

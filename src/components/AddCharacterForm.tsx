@@ -15,7 +15,7 @@ interface AddPlayerFormElement extends HTMLFormElement {
   readonly elements: FormElements;
 }
 
-export default function AddPlayerForm({onAdd}: Props) {
+export default function AddCharacterForm({onAdd}: Props) {
   function handleSubmit(e: FormEvent<AddPlayerFormElement>) {
     e.preventDefault();
     const elements = e.currentTarget.elements;
